@@ -73,7 +73,7 @@ class AirCargoProblem(Problem):
                         load=Action(expr("Load({},{},{})".format(c,p,a)),
                                     [precond_pos,precond_neg],
                                     [effect_add,effect_rem])
-                        loads.append(load)           
+                         loads.append(load)           
             
             return loads
 
