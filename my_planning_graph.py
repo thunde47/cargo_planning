@@ -2,6 +2,7 @@ from aimacode.planning import Action
 from aimacode.search import Problem
 from aimacode.utils import expr
 from lp_utils import decode_state
+import itertools
 
 
 class PgNode():
@@ -403,6 +404,10 @@ class PlanningGraph():
         :return: bool
         """
         # TODO test for Inconsistent Effects between nodes
+        
+        for effect1, effect2 in itertools.zip_longest(node_a1.action.effect_add, node_a1.action.effect_rem):
+            if (effect1 in node_a2.action.effect_rem) or (effect2 in node_a2.action.effect_add):
+                return True
         return False
 
     def interference_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
@@ -420,6 +425,12 @@ class PlanningGraph():
         :return: bool
         """
         # TODO test for Interference between nodes
+        for effect1, effect2 in itertools.zip_longest(node_a1.action.effect_add, node_a1.action.effect_rem):
+            if (effect1 in node_a2.action.precond_neg) or (effect2 in node_a2.action.precond_pos):
+                return True
+        for effect1, effect2 in itertools.zip_longest(node_a2.action.effect_add, node_a2.action.effect_rem):
+            if (effect1 in node_a1.action.precond_neg) or (effect2 in node_a1.action.precond_pos):
+                return True                
         return False
 
     def competing_needs_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
@@ -434,6 +445,10 @@ class PlanningGraph():
         """
 
         # TODO test for Competing Needs between nodes
+        for precond1 in node_a1.parents:
+            for precond2 in node_a2.parents:
+                if precond1.is_mutex(precond2):
+                    return True
         return False
 
     def update_s_mutex(self, nodeset: set):
@@ -469,7 +484,8 @@ class PlanningGraph():
         :return: bool
         """
         # TODO test for negation between nodes
-        return False
+        return node_s1.symbol==node_s2.symbol and not node_s1.__eq__(node_s2)
+   
 
     def inconsistent_support_mutex(self, node_s1: PgNode_s, node_s2: PgNode_s):
         """
@@ -488,7 +504,12 @@ class PlanningGraph():
         :return: bool
         """
         # TODO test for Inconsistent Support between nodes
-        return False
+        
+        for precond1 in node_s1.parents:
+            for precond2 in node_s2.parents:
+               if not precond1.is_mutex(precond2):
+                   return False
+        return True
 
     def h_levelsum(self) -> int:
         """The sum of the level costs of the individual goals (admissible if goals independent)
