@@ -213,8 +213,8 @@ class AirCargoProblem(Problem):
         kb = PropKB()
         kb.tell(decode_state(node.state, self.state_map).pos_sentence())
         for clause in self.goal:
-            if clause not in kb.clauses:
-                count+=1        
+            if clause not in kb.clauses:  #if a goal is not in knowledge base yet
+                count+=1  #add the number of more minimum actions required to reach that goal
         return count
 
 
